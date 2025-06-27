@@ -91,9 +91,9 @@ def _parse_args(
 
 def _set_transformers_logging() -> None:
     if os.getenv("LLAMAFACTORY_VERBOSITY", "INFO") in ["DEBUG", "INFO"]:
-        transformers.utils.logging.set_verbosity_info()
-        transformers.utils.logging.enable_default_handler()
-        transformers.utils.logging.enable_explicit_format()
+        transformers.utils.logging.set_verbosity_info()  # 设置transformers的日志级别为INFO
+        transformers.utils.logging.enable_default_handler()  # 启用默认的日志处理器
+        transformers.utils.logging.enable_explicit_format()  # 启用显式的日志格式
 
 
 def _set_env_vars() -> None:
@@ -209,7 +209,7 @@ def get_train_args(args: Optional[Union[dict[str, Any], list[str]]] = None) -> _
 
     # Setup logging
     if training_args.should_log:
-        _set_transformers_logging()
+        _set_transformers_logging()  # 设置transformers的日志
 
     # Check arguments
     if finetuning_args.stage != "sft":
@@ -303,9 +303,9 @@ def get_train_args(args: Optional[Union[dict[str, Any], list[str]]] = None) -> _
     if model_args.use_unsloth and is_deepspeed_zero3_enabled():
         raise ValueError("Unsloth is incompatible with DeepSpeed ZeRO-3.")
 
-    _set_env_vars()
-    _verify_model_args(model_args, data_args, finetuning_args)
-    _check_extra_dependencies(model_args, finetuning_args, training_args)
+    _set_env_vars()  # 为NPU设置相关处理的环境变量
+    _verify_model_args(model_args, data_args, finetuning_args)  # 验证模型参数
+    _check_extra_dependencies(model_args, finetuning_args, training_args)  # 检查额外的依赖
 
     if (
         training_args.do_train
@@ -313,10 +313,10 @@ def get_train_args(args: Optional[Union[dict[str, Any], list[str]]] = None) -> _
         and model_args.quantization_bit is None
         and model_args.resize_vocab
         and finetuning_args.additional_target is None
-    ):
+    ):  # 如果训练类型为LoRA，且量化位数为None，且resize_vocab为True，且additional_target为None
         logger.warning_rank0(
             "Remember to add embedding layers to `additional_target` to make the added tokens trainable."
-        )
+        )  # 警告：请将embedding层添加到`additional_target`中，以使添加的tokens可训练
 
     if training_args.do_train and model_args.quantization_bit is not None and (not model_args.upcast_layernorm):
         logger.warning_rank0("We recommend enable `upcast_layernorm` in quantized training.")

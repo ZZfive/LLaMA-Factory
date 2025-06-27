@@ -23,14 +23,14 @@ USAGE = (
     "-" * 70
     + "\n"
     + "| Usage:                                                             |\n"
-    + "|   llamafactory-cli api -h: launch an OpenAI-style API server       |\n"
-    + "|   llamafactory-cli chat -h: launch a chat interface in CLI         |\n"
-    + "|   llamafactory-cli eval -h: evaluate models                        |\n"
-    + "|   llamafactory-cli export -h: merge LoRA adapters and export model |\n"
-    + "|   llamafactory-cli train -h: train models                          |\n"
-    + "|   llamafactory-cli webchat -h: launch a chat interface in Web UI   |\n"
-    + "|   llamafactory-cli webui: launch LlamaBoard                        |\n"
-    + "|   llamafactory-cli version: show version info                      |\n"
+    + "|   llamafactory-cli api -h: launch an OpenAI-style API server       |\n"  # 启动一个OpenAI风格的API服务器
+    + "|   llamafactory-cli chat -h: launch a chat interface in CLI         |\n"  # 启动一个CLI风格的聊天界面
+    + "|   llamafactory-cli eval -h: evaluate models                        |\n"  # 评估模型
+    + "|   llamafactory-cli export -h: merge LoRA adapters and export model |\n"  # 合并LoRA适配器并导出模型
+    + "|   llamafactory-cli train -h: train models                          |\n"  # 训练模型
+    + "|   llamafactory-cli webchat -h: launch a chat interface in Web UI   |\n"  # 启动一个WebUI风格的聊天界面
+    + "|   llamafactory-cli webui: launch LlamaBoard                        |\n"  # 启动LlamaBoard webui
+    + "|   llamafactory-cli version: show version info                      |\n"  # 显示版本信息
     + "-" * 70
 )
 
@@ -73,37 +73,37 @@ def main():
         "help": partial(print, USAGE),
     }
 
-    command = sys.argv.pop(1) if len(sys.argv) > 1 else "help"
-    if command == "train" and (is_env_enabled("FORCE_TORCHRUN") or (get_device_count() > 1 and not use_ray())):
+    command = sys.argv.pop(1) if len(sys.argv) > 1 else "help"  # 获取第一个参数，如果没有则使用help
+    if command == "train" and (is_env_enabled("FORCE_TORCHRUN") or (get_device_count() > 1 and not use_ray())):  # 如果命令是train，并且启用了FORCE_TORCHRUN或者设备数量大于1且没有使用ray
         # launch distributed training
-        nnodes = os.getenv("NNODES", "1")
-        node_rank = os.getenv("NODE_RANK", "0")
-        nproc_per_node = os.getenv("NPROC_PER_NODE", str(get_device_count()))
-        master_addr = os.getenv("MASTER_ADDR", "127.0.0.1")
-        master_port = os.getenv("MASTER_PORT", str(find_available_port()))
-        logger.info_rank0(f"Initializing {nproc_per_node} distributed tasks at: {master_addr}:{master_port}")
+        nnodes = os.getenv("NNODES", "1")  # 获取NNODES环境变量，如果没有则使用1
+        node_rank = os.getenv("NODE_RANK", "0")  # 获取NODE_RANK环境变量，如果没有则使用0
+        nproc_per_node = os.getenv("NPROC_PER_NODE", str(get_device_count()))  # 获取NPROC_PER_NODE环境变量，如果没有则使用设备数量
+        master_addr = os.getenv("MASTER_ADDR", "127.0.0.1")  # 获取MASTER_ADDR环境变量，如果没有则使用127.0.0.1
+        master_port = os.getenv("MASTER_PORT", str(find_available_port()))  # 获取MASTER_PORT环境变量，如果没有则使用一个可用的端口
+        logger.info_rank0(f"Initializing {nproc_per_node} distributed tasks at: {master_addr}:{master_port}")  # 打印初始化分布式任务的信息
         if int(nnodes) > 1:
-            logger.info_rank0(f"Multi-node training enabled: num nodes: {nnodes}, node rank: {node_rank}")
+            logger.info_rank0(f"Multi-node training enabled: num nodes: {nnodes}, node rank: {node_rank}")  # 打印多节点训练的信息
 
         # elastic launch support
-        max_restarts = os.getenv("MAX_RESTARTS", "0")
-        rdzv_id = os.getenv("RDZV_ID")
-        min_nnodes = os.getenv("MIN_NNODES")
-        max_nnodes = os.getenv("MAX_NNODES")
+        max_restarts = os.getenv("MAX_RESTARTS", "0")  # 获取MAX_RESTARTS环境变量，如果没有则使用0
+        rdzv_id = os.getenv("RDZV_ID")  # 获取RDZV_ID环境变量
+        min_nnodes = os.getenv("MIN_NNODES")  # 获取MIN_NNODES环境变量
+        max_nnodes = os.getenv("MAX_NNODES")  # 获取MAX_NNODES环境变量
 
-        env = deepcopy(os.environ)
-        if is_env_enabled("OPTIM_TORCH", "1"):
+        env = deepcopy(os.environ)  # 复制环境变量
+        if is_env_enabled("OPTIM_TORCH", "1"):  # 如果启用了OPTIM_TORCH环境变量
             # optimize DDP, see https://zhuanlan.zhihu.com/p/671834539
-            env["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
-            env["TORCH_NCCL_AVOID_RECORD_STREAMS"] = "1"
+            env["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"  # 设置PYTORCH_CUDA_ALLOC_CONF环境变量
+            env["TORCH_NCCL_AVOID_RECORD_STREAMS"] = "1"  # 设置TORCH_NCCL_AVOID_RECORD_STREAMS环境变量
 
-        if rdzv_id is not None:
+        if rdzv_id is not None:  # 如果RDZV_ID环境变量不为空
             # launch elastic job with fault tolerant support when possible
             # see also https://docs.pytorch.org/docs/stable/elastic/train_script.html
-            rdzv_nnodes = nnodes
+            rdzv_nnodes = nnodes  # 设置RDZV_NNODES环境变量
             # elastic number of nodes if MIN_NNODES and MAX_NNODES are set
-            if min_nnodes is not None and max_nnodes is not None:
-                rdzv_nnodes = f"{min_nnodes}:{max_nnodes}"
+            if min_nnodes is not None and max_nnodes is not None:  # 如果MIN_NNODES和MAX_NNODES环境变量不为空
+                rdzv_nnodes = f"{min_nnodes}:{max_nnodes}"  # 设置RDZV_NNODES环境变量
 
             process = subprocess.run(
                 (

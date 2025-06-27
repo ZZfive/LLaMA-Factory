@@ -18,7 +18,7 @@ import re
 from setuptools import find_packages, setup
 
 
-def get_version() -> str:
+def get_version() -> str:  # 版本管理
     with open(os.path.join("src", "llamafactory", "extras", "env.py"), encoding="utf-8") as f:
         file_content = f.read()
         pattern = r"{}\W*=\W*\"([^\"]+)\"".format("VERSION")
@@ -26,14 +26,14 @@ def get_version() -> str:
         return version
 
 
-def get_requires() -> list[str]:
+def get_requires() -> list[str]:  # 依赖管理
     with open("requirements.txt", encoding="utf-8") as f:
         file_content = f.read()
         lines = [line.strip() for line in file_content.strip().split("\n") if not line.startswith("#")]
         return lines
 
 
-def get_console_scripts() -> list[str]:
+def get_console_scripts() -> list[str]:  # 控制台脚本
     console_scripts = ["llamafactory-cli = llamafactory.cli:main"]
     if os.getenv("ENABLE_SHORT_CONSOLE", "1").lower() in ["true", "y", "1"]:
         console_scripts.append("lmf = llamafactory.cli:main")
@@ -41,7 +41,7 @@ def get_console_scripts() -> list[str]:
     return console_scripts
 
 
-extra_require = {
+extra_require = {  # 额外依赖
     "torch": ["torch>=2.0.0", "torchvision>=0.15.0"],
     "torch-npu": ["torch==2.4.0", "torch-npu==2.4.0.post2", "decorator"],
     "metrics": ["nltk", "jieba", "rouge-chinese"],

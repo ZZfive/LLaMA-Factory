@@ -237,8 +237,8 @@ def numpify(inputs: Union["NDArray", "torch.Tensor"]) -> "NDArray":
 
 def skip_check_imports() -> None:
     r"""Avoid flash attention import error in custom model files."""
-    if not is_env_enabled("FORCE_CHECK_IMPORTS"):
-        transformers.dynamic_module_utils.check_imports = get_relative_imports
+    if not is_env_enabled("FORCE_CHECK_IMPORTS"):  # 如果未启用FORCE_CHECK_IMPORTS环境变量
+        transformers.dynamic_module_utils.check_imports = get_relative_imports  # 设置check_imports为get_relative_imports
 
 
 def torch_gc() -> None:

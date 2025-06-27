@@ -48,8 +48,8 @@ logger = logging.get_logger(__name__)
 
 
 def patch_tokenizer(tokenizer: "PreTrainedTokenizer", model_args: "ModelArguments") -> None:
-    if "PreTrainedTokenizerBase" not in str(tokenizer._pad.__func__):
-        tokenizer._pad = MethodType(PreTrainedTokenizerBase._pad, tokenizer)
+    if "PreTrainedTokenizerBase" not in str(tokenizer._pad.__func__):  # 判断当前tokenizer的_pad方法是否继承至PreTrainedTokenizerBase的_pad方法
+        tokenizer._pad = MethodType(PreTrainedTokenizerBase._pad, tokenizer)  # 使用MethodType将PreTrainedTokenizerBase的_pad方法动态绑定到tokenizer的_pad方法上
 
     if model_args.model_max_length is not None and tokenizer.model_max_length < model_args.model_max_length:
         tokenizer.model_max_length = model_args.model_max_length  # enlarge the tokenizer max length

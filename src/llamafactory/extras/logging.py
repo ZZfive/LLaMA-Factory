@@ -31,37 +31,37 @@ _default_handler: Optional["logging.Handler"] = None
 _default_log_level: "logging._Level" = logging.INFO
 
 
-class LoggerHandler(logging.Handler):
+class LoggerHandler(logging.Handler):  # 将LLaMa Board的日志重定向到日志文件
     r"""Redirect the logging output to the logging file for LLaMA Board."""
 
     def __init__(self, output_dir: str) -> None:
         super().__init__()
-        self._formatter = logging.Formatter(
-            fmt="[%(levelname)s|%(asctime)s] %(filename)s:%(lineno)s >> %(message)s",
-            datefmt="%Y-%m-%d %H:%M:%S",
+        self._formatter = logging.Formatter(  # 设置日志格式
+            fmt="[%(levelname)s|%(asctime)s] %(filename)s:%(lineno)s >> %(message)s",  # 日志格式
+            datefmt="%Y-%m-%d %H:%M:%S",  # 日期格式
         )
         self.setLevel(logging.INFO)
-        os.makedirs(output_dir, exist_ok=True)
-        self.running_log = os.path.join(output_dir, RUNNING_LOG)
-        if os.path.exists(self.running_log):
-            os.remove(self.running_log)
+        os.makedirs(output_dir, exist_ok=True)  # 创建输出目录
+        self.running_log = os.path.join(output_dir, RUNNING_LOG)  # 设置日志文件路径
+        if os.path.exists(self.running_log):  # 如果日志文件存在
+            os.remove(self.running_log)  # 删除日志文件
 
-        self.thread_pool = ThreadPoolExecutor(max_workers=1)
+        self.thread_pool = ThreadPoolExecutor(max_workers=1)  # 创建线程池
 
-    def _write_log(self, log_entry: str) -> None:
-        with open(self.running_log, "a", encoding="utf-8") as f:
-            f.write(log_entry + "\n\n")
+    def _write_log(self, log_entry: str) -> None:  # 将日志写入文件
+        with open(self.running_log, "a", encoding="utf-8") as f:  # 打开日志文件
+            f.write(log_entry + "\n\n")  # 写入日志
 
-    def emit(self, record) -> None:
-        if record.name == "httpx":
+    def emit(self, record) -> None:  # 将日志写入文件
+        if record.name == "httpx":  # 排除httpx库的日志
             return
 
-        log_entry = self._formatter.format(record)
-        self.thread_pool.submit(self._write_log, log_entry)
+        log_entry = self._formatter.format(record)  # 格式化日志
+        self.thread_pool.submit(self._write_log, log_entry)  # 提交日志写入任务；使用线程池异步写入，避免阻塞主线程
 
-    def close(self) -> None:
-        self.thread_pool.shutdown(wait=True)
-        return super().close()
+    def close(self) -> None:  # 关闭线程池
+        self.thread_pool.shutdown(wait=True)  # 等待线程池中的任务完成
+        return super().close()  # 关闭日志处理器
 
 
 class _Logger(logging.Logger):
