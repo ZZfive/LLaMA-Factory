@@ -75,18 +75,18 @@ def read_args(args: Optional[Union[dict[str, Any], list[str]]] = None) -> Union[
 def _parse_args(
     parser: "HfArgumentParser", args: Optional[Union[dict[str, Any], list[str]]] = None, allow_extra_keys: bool = False
 ) -> tuple[Any]:
-    args = read_args(args)
+    args = read_args(args)  # 读取参数
     if isinstance(args, dict):
-        return parser.parse_dict(args, allow_extra_keys=allow_extra_keys)
+        return parser.parse_dict(args, allow_extra_keys=allow_extra_keys)  # 解析参数
 
-    (*parsed_args, unknown_args) = parser.parse_args_into_dataclasses(args=args, return_remaining_strings=True)
+    (*parsed_args, unknown_args) = parser.parse_args_into_dataclasses(args=args, return_remaining_strings=True)  # 解析参数
 
     if unknown_args and not allow_extra_keys:
-        print(parser.format_help())
-        print(f"Got unknown args, potentially deprecated arguments: {unknown_args}")
-        raise ValueError(f"Some specified arguments are not used by the HfArgumentParser: {unknown_args}")
+        print(parser.format_help())  # 打印帮助信息
+        print(f"Got unknown args, potentially deprecated arguments: {unknown_args}")  # 打印未知参数
+        raise ValueError(f"Some specified arguments are not used by the HfArgumentParser: {unknown_args}")  # 抛出错误
 
-    return tuple(parsed_args)
+    return tuple(parsed_args)  # 返回解析后的参数
 
 
 def _set_transformers_logging() -> None:
@@ -181,9 +181,9 @@ def _check_extra_dependencies(
 
 
 def _parse_train_args(args: Optional[Union[dict[str, Any], list[str]]] = None) -> _TRAIN_CLS:
-    parser = HfArgumentParser(_TRAIN_ARGS)
-    allow_extra_keys = is_env_enabled("ALLOW_EXTRA_ARGS")
-    return _parse_args(parser, args, allow_extra_keys=allow_extra_keys)
+    parser = HfArgumentParser(_TRAIN_ARGS)  # 初始化参数解析器
+    allow_extra_keys = is_env_enabled("ALLOW_EXTRA_ARGS")  # 是否允许额外的参数
+    return _parse_args(parser, args, allow_extra_keys=allow_extra_keys)  # 解析参数
 
 
 def _parse_infer_args(args: Optional[Union[dict[str, Any], list[str]]] = None) -> _INFER_CLS:
@@ -398,7 +398,7 @@ def get_train_args(args: Optional[Union[dict[str, Any], list[str]]] = None) -> _
         model_args.compute_dtype = torch.float16
 
     model_args.device_map = {"": get_current_device()}
-    model_args.model_max_length = data_args.cutoff_len
+    model_args.model_max_length = data_args.cutoff_len  # 设置模型最大长度
     model_args.block_diag_attn = data_args.neat_packing
     data_args.packing = data_args.packing if data_args.packing is not None else finetuning_args.stage == "pt"
 

@@ -115,7 +115,7 @@ class DownloadSource(str, Enum):
     OPENMIND = "om"
 
 
-@unique
+@unique  # 确保枚举值是唯一的，即要求每种量化方法独赢的字符串值要唯一，不然会报错
 class QuantizationMethod(str, Enum):
     r"""Borrowed from `transformers.utils.quantization_config.QuantizationMethod`."""
 

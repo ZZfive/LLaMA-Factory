@@ -67,7 +67,7 @@ class DatasetAttr:
         return self.dataset_name
 
     def set_attr(self, key: str, obj: dict[str, Any], default: Optional[Any] = None) -> None:
-        setattr(self, key, obj.get(key, default))
+        setattr(self, key, obj.get(key, default))  # 设置属性
 
     def join(self, attr: dict[str, Any]) -> None:
         self.set_attr("formatting", attr, default="alpaca")
@@ -115,7 +115,7 @@ def get_dataset_list(dataset_names: Optional[list[str]], dataset_dir: str) -> li
     dataset_list: list[DatasetAttr] = []
     for name in dataset_names:
         if dataset_info is None:  # dataset_dir is ONLINE
-            load_from = "ms_hub" if use_modelscope() else "om_hub" if use_openmind() else "hf_hub"
+            load_from = "ms_hub" if use_modelscope() else "om_hub" if use_openmind() else "hf_hub"  # 根据环境变量选择数据集来源
             dataset_attr = DatasetAttr(load_from, dataset_name=name)
             dataset_list.append(dataset_attr)
             continue
@@ -141,7 +141,7 @@ def get_dataset_list(dataset_names: Optional[list[str]], dataset_dir: str) -> li
         else:
             dataset_attr = DatasetAttr("file", dataset_name=dataset_info[name]["file_name"])
 
-        dataset_attr.join(dataset_info[name])
+        dataset_attr.join(dataset_info[name])  # 将数据集信息合并到dataset_attr中
         dataset_list.append(dataset_attr)
 
     return dataset_list

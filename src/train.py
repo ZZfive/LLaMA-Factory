@@ -26,3 +26,24 @@ def _mp_fn(index):
 
 if __name__ == "__main__":
     main()
+
+
+# import sys
+# from llamafactory.train.tuner import run_exp
+
+
+# def main():
+#     # 如果有命令行参数，将其添加到 sys.argv
+#     if len(sys.argv) > 1:
+#         # 保持原有的 sys.argv 结构
+#         pass
+#     run_exp()
+
+
+# def _mp_fn(index):
+#     # For xla_spawn (TPUs)
+#     run_exp()
+
+
+# if __name__ == "__main__":
+#     main()

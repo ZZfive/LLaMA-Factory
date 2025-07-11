@@ -34,7 +34,7 @@ from .processor import (
 )
 
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # 以下导入只会在类型检查时生效，不会在运行时生效
     from datasets import Dataset, IterableDataset
     from transformers import PreTrainedTokenizer, ProcessorMixin, Seq2SeqTrainingArguments
 
@@ -72,7 +72,7 @@ def _load_single_dataset(
 
     elif dataset_attr.load_from == "file":
         data_files = []
-        local_path = os.path.join(data_args.dataset_dir, dataset_attr.dataset_name)
+        local_path = os.path.join(data_args.dataset_dir, dataset_attr.dataset_name)  # 数据集路径
         if os.path.isdir(local_path):  # is directory
             for file_name in os.listdir(local_path):
                 data_files.append(os.path.join(local_path, file_name))
@@ -85,12 +85,12 @@ def _load_single_dataset(
         if data_path is None:
             raise ValueError("Allowed file types: {}.".format(",".join(FILEEXT2TYPE.keys())))
 
-        if any(data_path != FILEEXT2TYPE.get(os.path.splitext(data_file)[-1][1:], None) for data_file in data_files):
+        if any(data_path != FILEEXT2TYPE.get(os.path.splitext(data_file)[-1][1:], None) for data_file in data_files):  # data_files中有多个文件时，文件类型应该相同
             raise ValueError("File types should be identical.")
     else:
         raise NotImplementedError(f"Unknown load type: {dataset_attr.load_from}.")
 
-    if dataset_attr.load_from == "ms_hub":
+    if dataset_attr.load_from == "ms_hub":  # 使用modelscope加载数据集
         check_version("modelscope>=1.11.0", mandatory=True)
         from modelscope import MsDataset  # type: ignore
         from modelscope.utils.config_ds import MS_DATASETS_CACHE  # type: ignore
@@ -109,7 +109,7 @@ def _load_single_dataset(
         if isinstance(dataset, MsDataset):
             dataset = dataset.to_hf_dataset()
 
-    elif dataset_attr.load_from == "om_hub":
+    elif dataset_attr.load_from == "om_hub":  # 使用openmind加载数据集
         check_version("openmind>=0.8.0", mandatory=True)
         from openmind import OmDataset  # type: ignore
         from openmind.utils.hub import OM_DATASETS_CACHE  # type: ignore
@@ -125,10 +125,10 @@ def _load_single_dataset(
             token=model_args.om_hub_token,
             streaming=data_args.streaming,
         )
-    elif dataset_attr.load_from == "cloud_file":
+    elif dataset_attr.load_from == "cloud_file":  # 使用云端文件加载数据集
         dataset = Dataset.from_list(read_cloud_json(data_path), split=dataset_attr.split)
     else:
-        dataset = load_dataset(
+        dataset = load_dataset(  # 从本地加载数据集
             path=data_path,
             name=data_name,
             data_dir=data_dir,
@@ -138,7 +138,7 @@ def _load_single_dataset(
             token=model_args.hf_hub_token,
             num_proc=data_args.preprocessing_num_workers,
             trust_remote_code=model_args.trust_remote_code,
-            streaming=data_args.streaming and dataset_attr.load_from != "file",
+            streaming=data_args.streaming and dataset_attr.load_from != "file",  # 判断是否流式加载
         )
         if data_args.streaming and dataset_attr.load_from == "file":
             dataset = dataset.to_iterable_dataset(num_shards=training_args.dataloader_num_workers)
@@ -157,9 +157,9 @@ def _load_single_dataset(
 
     if data_args.max_samples is not None:  # truncate dataset
         max_samples = min(data_args.max_samples, len(dataset))
-        dataset = dataset.select(range(max_samples))
+        dataset = dataset.select(range(max_samples))  # 截取数据集
 
-    return align_dataset(dataset, dataset_attr, data_args, training_args)
+    return align_dataset(dataset, dataset_attr, data_args, training_args)  # 数据集对齐
 
 
 def _get_merged_dataset(
@@ -300,7 +300,7 @@ def get_dataset(
             raise ValueError("Turn off `streaming` when saving dataset to disk.")
 
     # Load and preprocess dataset
-    with training_args.main_process_first(desc="load dataset", local=(not data_args.data_shared_file_system)):
+    with training_args.main_process_first(desc="load dataset", local=(not data_args.data_shared_file_system)):  # main_process_first是TrainingArguments类的方法，用于在分布式训练中协调多个进程的执行顺序
         dataset = _get_merged_dataset(data_args.dataset, model_args, data_args, training_args, stage)
         eval_dataset = _get_merged_dataset(
             data_args.eval_dataset,

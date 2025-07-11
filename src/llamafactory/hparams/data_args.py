@@ -85,7 +85,7 @@ class DataArguments:
     )
     max_samples: Optional[int] = field(
         default=None,
-        metadata={"help": "For debugging purposes, truncate the number of examples for each dataset."},
+        metadata={"help": "For debugging purposes,  truncatethe number of examples for each dataset."},
     )
     eval_num_beams: Optional[int] = field(
         default=None,

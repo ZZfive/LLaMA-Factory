@@ -149,7 +149,7 @@ class SharegptDatasetConverter(DatasetConverter):
             self.dataset_attr.system_tag
             and len(messages) != 0
             and messages[0][self.dataset_attr.role_tag] == self.dataset_attr.system_tag
-        ):
+        ):  # 如果存在system prompt
             system = messages[0][self.dataset_attr.content_tag]
             messages = messages[1:]
         else:
@@ -266,9 +266,9 @@ def align_dataset(
     _videos: []
     _audios: []
     """
-    column_names = list(next(iter(dataset)).keys())
+    column_names = list(next(iter(dataset)).keys())  # 获取数据集的列名
     kwargs = {}
-    if not data_args.streaming:
+    if not data_args.streaming:  # 如果数据集不是流式加载
         kwargs = dict(
             num_proc=data_args.preprocessing_num_workers,
             load_from_cache_file=(not data_args.overwrite_cache) or (training_args.local_process_index != 0),
@@ -277,8 +277,8 @@ def align_dataset(
 
     dataset_converter = get_dataset_converter(dataset_attr.formatting, dataset_attr, data_args)
     return dataset.map(
-        dataset_converter,
-        batched=False,
-        remove_columns=column_names,
+        dataset_converter,  # 转换函数，将数据集中的每个样本转换为标准格式
+        batched=False,  # 非批量，逐个处理
+        remove_columns=column_names,  # 在映射函数后从数据结果中删除指定列
         **kwargs,
     )
